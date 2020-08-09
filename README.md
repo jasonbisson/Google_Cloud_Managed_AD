@@ -7,19 +7,13 @@ This repository will deploy a highly-available Managed Active directory domain a
 
 ## Feature Highlights
 
-<br/>
-
 - **Managed Active Directory** - The Managed Active Directory domain will be deployed with opinionated defaults for region,zone, and subnet for the Domain controllers. 
 
 - **Isolated Windows Compute Instance** - The Windows instance will be deployed without a public IP, NAT service, and firewalls to limit access.
 
 - **Google Cloud Directory Sync Simulation** - To demostrate the ability to  Windows instance can used to simulate the sync.
-***
-<br/>
 
 ## Client Requirements
-
-<br/>
 
 ### Terraform plugins
 - [Terraform](https://www.terraform.io/downloads.html) 0.12.x
@@ -38,12 +32,8 @@ This repository will deploy a highly-available Managed Active directory domain a
 - /variables.tf: all the variables for the module
 - /terraform.tfvars.template: Custom variable file to eliminate manual prompts.
 - /README.MD: this file
-***
-<br/>
 
 ## Google Platform Requirements
-
-<br/>
 
 ### Enable APIs
 For the tutorial to work, the following APIs will be auto enabled in the project:
@@ -61,12 +51,9 @@ The **Terraform service account** used to run this module must have the followin
 - `Compute Instance Admin` on the project to create the VM.
 - `Project IAM Admin` on the project to grant permissions to the VM service account.
 
-***
-<br/>
+
 
 ## Deploy Windows Infrastructure
-
-<br/>
 
 1. Deploy Windows server environment with Terraform:
 
@@ -113,23 +100,21 @@ The **Terraform service account** used to run this module must have the followin
     Enter Domain password 
     ```
 1. Confirm server joined domain
-    <br/>
+
     1. Log back into server with <Name of domain>\setupadmin
     1. Click on Windows Administrative Tools and Click on Active Directory Users and Computers
     1. Click on Name of domain -> Cloud -> Computers
     1. Click on Domain Controllers to view the domain controllers
     1. Add users or groups under the Cloud OU or groups under the Cloud OU
-***
-<br/>
-<br/>
 
 ### Optional Google Cloud Directory Sync
-
-<br/>
 
 1. Deploy a Cloud NAT with tutorial or Terraform to download Google Cloud Directory Sync & interact with Cloud Identity.
     ```text
     https://cloud.google.com/nat/docs/using-nat
+
+    or
+
     https://github.com/terraform-google-modules/terraform-google-cloud-nat
     ```
 1. Powershell scripts to download and install GCDS, download Chrome browser, and add users to Active Directory.
@@ -155,7 +140,7 @@ The **Terraform service account** used to run this module must have the followin
     https://cloud.google.com/solutions/federating-gcp-with-active-directory-synchronizing-user-accounts
     
     #Helper ldap search rules for Users & Groups
-    $ cat .\gdsc_ldap_rules_examples 
+    $ cat gdsc_ldap_rules_examples 
 
 
     ```
