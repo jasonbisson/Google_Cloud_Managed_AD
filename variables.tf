@@ -16,6 +16,8 @@ variable "environment" {
 variable "project" {
   description = "The ID of the project where this VPC will be created"
 }
+
+
 variable "region" {
   default = "us-central1"
 }
@@ -96,4 +98,16 @@ variable "disable_dependent_services" {
   description = "Whether services that are enabled and which depend on this service should also be disabled when this service is destroyed. https://www.terraform.io/docs/providers/google/r/google_project_service.html#disable_dependent_services"
   default     = "false"
   type        = "string"
+}
+
+variable "project_id" {
+  description = "The ID for Cloud NAT deployment"
+}
+
+variable "router" {
+  description = "Name of Router for Cloud NAT"
+}
+
+variable "create_router" {
+  description = "Create the cloud router"
 }

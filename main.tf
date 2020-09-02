@@ -16,10 +16,19 @@ terraform {
 }
 
 provider "google" {
-  version = "~> 2.5.0"
+  version = "~> 3.0.0"
   project = "${var.project}"
   region  = "${var.region}"
   zone    = "${var.zone}"
+}
+
+module "cloud-nat" {
+  source     = "../terraform-google-cloud-nat/"
+  router     = var.router
+  project_id = var.project_id
+  region     = var.region
+  network   = var.network
+  create_router = var.create_router
 }
 
 

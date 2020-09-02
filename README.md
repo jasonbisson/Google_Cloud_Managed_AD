@@ -109,13 +109,9 @@ The **Terraform service account** used to run this module must have the followin
 
 ### Optional Google Cloud Directory Sync
 
-1. Deploy a Cloud NAT with tutorial or Terraform to download Google Cloud Directory Sync & interact with Cloud Identity.
+1. Deploy a Cloud NAT with Terraform to download Google Cloud Directory Sync & interact with Cloud Identity.
     ```text
-    https://cloud.google.com/nat/docs/using-nat
-
-    or
-
-    https://github.com/terraform-google-modules/terraform-google-cloud-nat
+    Clone https://github.com/terraform-google-modules/terraform-google-cloud-nat
     ```
 1. Powershell scripts to download and install GCDS, download Chrome browser, and add users to Active Directory.
     ```text
@@ -127,7 +123,7 @@ The **Terraform service account** used to run this module must have the followin
     $ create_base_ou.ps1
     
     #Create Groups
-    $ Copy-Item "groups.csv" -destination "$LocalTempDir" 
+    $ Copy-Item "groups.csv" -destination C:\Windows\temp\
     $ create_groups.ps1 
     
     #Create Users 
