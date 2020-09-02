@@ -71,6 +71,7 @@ The **Terraform service account** used to run this module must have the followin
     1. Creates a windows server
     1. Creates a firewall to connect to the Managed Active Directory Domain Controllers
     1. Creates a service account with the most restrictive permissions to those resources
+    1. Deploy Cloud NAT instance to download Chrome Browser, Google Directory Sync, and Git for Windows
 
 1. Deploy Managed Active Directory with gcloud commands
     ```text
@@ -106,6 +107,7 @@ The **Terraform service account** used to run this module must have the followin
     1. Click on Name of domain -> Cloud -> Computers
     1. Click on Domain Controllers to view the domain controllers
     1. Add users or groups under the Cloud OU or groups under the Cloud OU
+
 
 ### Optional Google Cloud Directory Sync
 
