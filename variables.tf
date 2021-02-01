@@ -13,8 +13,13 @@
 variable "environment" {
   description = "Environment for the environment"
 }
+
 variable "project" {
   description = "The ID of the project where this VPC will be created"
+}
+
+variable "active_directory_domain" {
+  description = "Domainname of Managed Active Directory instance"
 }
 
 
@@ -70,12 +75,19 @@ variable "auto_delete" {
 }
 
 variable "network" {
-  type = "string"
+  type = string
 }
 
 variable "internal_cidr_ranges" {
-  type = "list"
+  type = list
+  description = "Firewall rule to connect to Managed AD instance"
 }
+
+variable "reserved_ip_range" {
+  type = string
+  description = "Subnet range to deploy domain controllers of Managed AD instance"
+}
+
 
 variable "enable_apis" {
   description = "Whether to actually enable the APIs. If false, this module is a no-op."
@@ -91,23 +103,17 @@ variable "activate_apis" {
 variable "disable_services_on_destroy" {
   description = "Whether project services will be disabled when the resources are destroyed. https://www.terraform.io/docs/providers/google/r/google_project_service.html#disable_on_destroy"
   default     = "false"
-  type        = "string"
+  type        = string
 }
 
 variable "disable_dependent_services" {
   description = "Whether services that are enabled and which depend on this service should also be disabled when this service is destroyed. https://www.terraform.io/docs/providers/google/r/google_project_service.html#disable_dependent_services"
   default     = "false"
-  type        = "string"
-}
-
-variable "project_id" {
-  description = "The ID for Cloud NAT deployment"
-}
-
-variable "router" {
-  description = "Name of Router for Cloud NAT"
+  type        = string
 }
 
 variable "create_router" {
   description = "Create the cloud router"
+  default     = "true"
+  type        = string
 }

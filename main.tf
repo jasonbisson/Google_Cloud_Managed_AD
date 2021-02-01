@@ -10,29 +10,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-terraform {
-  required_version = ">= 0.12"
-  backend "gcs" {}
-}
-
-provider "google" {
-  version = "~> 3.0.0"
-  project = "${var.project}"
-  region  = "${var.region}"
-  zone    = "${var.zone}"
-}
 
 module "cloud-nat" {
-  source     = "../terraform-google-cloud-nat/"
-  router     = var.router
-  project_id = var.project_id
-  region     = var.region
-  network   = var.network
+  source        = "terraform-google-modules/cloud-nat/google"
+  router        = var.environment
+  project_id    = var.project
+  region        = var.region
+  network       = var.network
   create_router = var.create_router
 }
 
+resource "random_id" "service_account" {
+  byte_length = 2
+}
 
 resource "google_project_service" "project_services" {
+  project                    = var.project
   count                      = var.enable_apis ? length(var.activate_apis) : 0
   service                    = element(var.activate_apis, count.index)
   disable_on_destroy         = var.disable_services_on_destroy
@@ -48,11 +41,9 @@ data "google_compute_image" "image" {
 data "template_file" "startup_script_config" {
   template = "${file("${path.module}/scripts/startup.ps1")}"
 }
-resource "random_id" "service_account" {
-  byte_length = 2
-}
 
 resource "google_service_account" "service_account" {
+  project      = var.project
   account_id   = "${var.environment}${random_id.service_account.hex}"
   display_name = "GCE service account for ${var.environment}${random_id.service_account.hex}"
 }
@@ -82,6 +73,8 @@ resource "google_project_iam_member" "bigquery_viewer" {
 }
 
 resource "google_compute_instance" "default" {
+  project      = "${var.project}"
+  zone         = "${var.zone}"
   name         = "${var.environment}${random_id.service_account.hex}"
   machine_type = "${var.machine_type}"
   labels       = "${var.labels}"
@@ -108,7 +101,7 @@ resource "google_compute_instance" "default" {
   }
 
   network_interface {
-    subnetwork = "${var.ip_subnetworks}"
+    network = "default"
   }
 
   lifecycle {
@@ -117,6 +110,7 @@ resource "google_compute_instance" "default" {
 }
 
 resource "google_compute_firewall" "default" {
+  project     = var.project
   name        = "${var.environment}${random_id.service_account.hex}"
   description = "GCE Firewall for ${var.environment}"
   network     = "${var.network}"
@@ -130,4 +124,13 @@ resource "google_compute_firewall" "default" {
     protocol = "udp"
   }
   destination_ranges = "${var.internal_cidr_ranges}"
+}
+
+
+resource "google_active_directory_domain" "ad-domain" {
+  project            = var.project
+  domain_name        = var.active_directory_domain
+  locations          = [var.region]
+  reserved_ip_range  = var.reserved_ip_range
+  authorized_networks = ["projects/${var.project}/global/networks/${var.network}"]
 }
