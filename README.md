@@ -51,11 +51,9 @@ The **Terraform service account** used to run this module must have the followin
 - `Compute Instance Admin` on the project to create the VM.
 - `Project IAM Admin` on the project to grant permissions to the VM service account.
 
+## Deploy Infrastructure
 
-
-## Deploy Windows Infrastructure
-
-1. Deploy Windows server environment with Terraform:
+### Deploy with Terraform command line
 
     ```text
     #Update terraform.tfvars.template with values for your environment
@@ -65,19 +63,11 @@ The **Terraform service account** used to run this module must have the followin
     $ terraform apply
     ```
 
-    This operation will take some time as it:
+### (Optional) Deploy with Cloud Build
 
-    1. Enables the compute and iam apis on the project
-    1. Creates a windows server
-    1. Creates a firewall to connect to the Managed Active Directory Domain Controllers
-    1. Creates a service account with the most restrictive permissions to those resources
-    1. Deploy Cloud NAT instance to download Chrome Browser, Google Directory Sync, and Git for Windows
-
-1. Deploy Managed Active Directory with gcloud commands
-    ```text
-    $ cd scripts
-    $ ./deploy_managed_ad.sh <Name of your domain>
-    #Wait for 25-30 minutes to deploy domain controllers & network peering
+```text
+gcloud builds submit . --config=cloudbuild.yaml --substitutions _STATEBUCKET='<Your GCS Bucket>',_STATEFOLDER='<Folder for Terraform state file>',_TERRAFORM_ACTION='<apply or destroy>',_ENVIRONMENT='<unique name for deployment>',_INTERNAL_CIDR='<Subnet for domain controllers ie 10.0.1.0/24>',_NETWORK='default',_DOMAIN='<AD domainname>',_SUBNET_NAME='<Subnet name>'
+```
 
 ### Interact with Microsoft Active Directory Domain
 
@@ -145,6 +135,4 @@ The **Terraform service account** used to run this module must have the followin
 # Cleanup (Save Money!)
 
     # Destroy the windows infrastructure
-    $ terraform destroy 
-    # Destroy Managed Active Directory instance and Domain admin secret.
-    $ ./scripts/destroy_managed_ad.sh
+    $ terraform destroy or Cloud build to destroy
