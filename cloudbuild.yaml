@@ -1,0 +1,31 @@
+# In this directory, run the following command to build this builder.
+# $ gcloud builds submit . --config=cloudbuild-plan.yaml --substitutions _STATEBUCKET='GCS Bucket',_STATEFOLDER='managedad',_ENVIRONMENT='managedad',_IMAGE_FAMILY='windows-2016',_IMAGE_PROJECT='windows-cloud',_INTERNAL_CIDR='10.0.1.0/24',_NETWORK='default',_DOMAIN='abigailbisson.com',_SUBNET_NAME='default'
+
+steps:
+- name: 'gcr.io/${PROJECT_ID}/terraform'
+  args: ['init',
+    '-backend-config=bucket=${_STATEBUCKET}',
+    '-backend-config=prefix=${_STATEFOLDER}'
+    ]
+  env:
+    - "TF_VAR_project-name=${PROJECT_ID}"
+- name: 'gcr.io/${PROJECT_ID}/terraform'
+  args: ['${_TERRAFORM_ACTION}', '-auto-approve']
+  env:
+    - "TF_VAR_project=${PROJECT_ID}"
+    - 'TF_VAR_environment=${_ENVIRONMENT}'
+    - 'TF_VAR_network=${_NETWORK}'
+    - 'TF_VAR_ip_subnetworks=${_SUBNET_NAME}'
+    - 'TF_VAR_internal_cidr_ranges=["${_INTERNAL_CIDR}"]'
+    - 'TF_VAR_reserved_ip_range=${_INTERNAL_CIDR}'
+    - 'TF_VAR_active_directory_domain=${_DOMAIN}'
+timeout: 1800s
+substitutions:
+    _TERRAFORM_ACTION:
+    _STATEBUCKET:
+    _STATEFOLDER:
+    _ENVIRONMENT:
+    _NETWORK:
+    _SUBNET_NAME:
+    _INTERNAL_CIDR:
+    _DOMAIN:

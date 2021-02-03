@@ -46,17 +46,19 @@ variable "can_ip_forward" {
 }
 
 variable "labels" {
-  type        = "map"
+  type        = map
   description = "Labels, provided as a map"
   default     = {}
 }
 
 variable "source_image_family" {
-  description = "Source image family. If neither source_image nor source_image_family is specified, defaults to the latest public CentOS image."
+  description = "Source image family. If neither source_image nor source_image_family is specified."
+  default = "windows-2016"
 }
 
 variable "source_image_project" {
   description = "Project where the source image comes from"
+  default = "windows-cloud"
 }
 
 variable "disk_size_gb" {
@@ -75,6 +77,7 @@ variable "auto_delete" {
 }
 
 variable "network" {
+  description = "Network for deployment of GCE instance and peering for Managed AD Instance"
   type = string
 }
 

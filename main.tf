@@ -34,8 +34,8 @@ resource "google_project_service" "project_services" {
 
 
 data "google_compute_image" "image" {
-  family  = "${var.source_image_family}"
-  project = "${var.source_image_project}"
+  family  = var.source_image_family
+  project = var.source_image_project
 }
 
 data "template_file" "startup_script_config" {
@@ -49,59 +49,59 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_project_iam_member" "Compute_admin" {
-  project = "${var.project}"
+  project = var.project
   role    = "roles/compute.admin"
   member  = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_project_iam_member" "source_reader" {
-  project = "${var.project}"
+  project = var.project
   role    = "roles/source.reader"
   member  = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_project_iam_member" "Storage_viewer" {
-  project = "${var.project}"
+  project = var.project
   role    = "roles/storage.objectViewer"
   member  = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_project_iam_member" "bigquery_viewer" {
-  project = "${var.project}"
+  project = var.project
   role    = "roles/bigquery.user"
   member  = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_compute_instance" "default" {
-  project      = "${var.project}"
-  zone         = "${var.zone}"
+  project      = var.project
+  zone         = var.zone
   name         = "${var.environment}${random_id.service_account.hex}"
-  machine_type = "${var.machine_type}"
-  labels       = "${var.labels}"
+  machine_type = var.machine_type
+  labels       = var.labels
 
 
   tags           = ["${var.environment}"]
-  can_ip_forward = "${var.can_ip_forward}"
+  can_ip_forward = var.can_ip_forward
 
   service_account {
-    email  = "${google_service_account.service_account.email}"
+    email  = google_service_account.service_account.email
     scopes = ["cloud-platform"]
   }
 
   boot_disk {
     initialize_params {
-      image = "${data.google_compute_image.image.self_link}"
-      size  = "${var.disk_size_gb}"
-      type  = "${var.disk_type}"
+      image = data.google_compute_image.image.self_link
+      size  = var.disk_size_gb
+      type  = var.disk_type
     }
   }
 
   metadata = {
-    windows-startup-script-ps1 = "${data.template_file.startup_script_config.rendered}"
+    windows-startup-script-ps1 = data.template_file.startup_script_config.rendered
   }
 
   network_interface {
-    network = "default"
+    network = var.network
   }
 
   lifecycle {
@@ -113,7 +113,7 @@ resource "google_compute_firewall" "default" {
   project     = var.project
   name        = "${var.environment}${random_id.service_account.hex}"
   description = "GCE Firewall for ${var.environment}"
-  network     = "${var.network}"
+  network     = var.network
   priority    = 1000
   direction   = "EGRESS"
   target_tags = ["${var.environment}"]
@@ -123,14 +123,14 @@ resource "google_compute_firewall" "default" {
   allow {
     protocol = "udp"
   }
-  destination_ranges = "${var.internal_cidr_ranges}"
+  destination_ranges = var.internal_cidr_ranges
 }
 
 
 resource "google_active_directory_domain" "ad-domain" {
   project            = var.project
   domain_name        = var.active_directory_domain
-  locations          = [var.region]
+  locations          = ["${var.region}"]
   reserved_ip_range  = var.reserved_ip_range
   authorized_networks = ["projects/${var.project}/global/networks/${var.network}"]
 }

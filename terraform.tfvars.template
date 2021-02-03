@@ -1,7 +1,7 @@
 environment="<Any unique name>"
 ip_subnetworks="<name of subnet in us-central>"
 project="<GCP Project>"
-source_image_family="windows-2016"
-source_image_project="windows-cloud"
-internal_cidr_ranges=["10.0.1.0/24"]
+internal_cidr_ranges=["<Private Subnet for domain controllers/24"]
 network="<Name of Network>"
+active_directory_domain="<Name of AD domain ie example.com"
+reserved_ip_range="<Private Subnet for domain controllers>"
