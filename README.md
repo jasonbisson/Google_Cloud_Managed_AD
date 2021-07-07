@@ -1,11 +1,14 @@
-This repository will deploy a highly-available Managed Active directory domain and a windows Compute instance to bind to the new Managed AD domain. In addition, there are optional powershell scripts to add users to the new domain and simulated a sync to Cloud Identity using Google Cloud Directory Sync.
+## Purpose
+
+This repository will deploy a highly-available Managed Active directory domain and a windows Compute instance to bind to the new Managed AD domain. In addition, there are powershell scripts to add users to the new domain and validate a sync to Cloud Identity using Google Cloud Directory Sync.
 
 ## Costs of this deployment can quickly become an issue if left running! 
+```
+Managed Active Directory Domain .40 per hour
+Windows GCE Instance estimate $119 per month
+```
 
-### Managed Active Directory Domain .40 per hour
-### Windows GCE Instance estimate $119 per month
-
-## Feature Highlights
+## Highlights
 
 - **Managed Active Directory** - The Managed Active Directory domain will be deployed with opinionated defaults for region,zone, and subnet for the Domain controllers. 
 
@@ -19,13 +22,10 @@ This repository will deploy a highly-available Managed Active directory domain a
 - [Terraform](https://www.terraform.io/downloads.html) 0.13.x
 - [terraform-provider-google](https://github.com/terraform-providers terraform-provider-google) plugin 3.50
 
-### Google SDK
-- [Google SDK](https://cloud.google.com/sdk)
-
 ### Microsoft RDP Client
 - [Remote Desktop](https://cloud.google.com/compute/docs/instances/connecting-to-instance#windows)
 
-## Update variables
+## Update Backend & Terraform variables
 
 1. Change to deployment directory
    ```
@@ -38,11 +38,11 @@ This repository will deploy a highly-available Managed Active directory domain a
 1. Rename `terraform.example.tfvars` to `terraform.tfvars` and update the file with values from your environment:
    ```
    mv terraform.example.tfvars terraform.tfvars
-
+   ```
 
 ## Deploy Infrastructure
 
-### Deploy from a desktop
+### Deploy via a desktop 
 
 1. Run `terraform init`
 1. Run `terraform plan` and review the output.
@@ -50,7 +50,7 @@ This repository will deploy a highly-available Managed Active directory domain a
 
 **Note** Managed Active Directory deployment can take up to 60 minutes
 
-### Optional Deploy a Cloud Build environment
+### Deploy via a Cloud Build environment (Advanced Option)
 
 1. Deploy Bootstrap environment from [Cloud Foundation Toolkit](https://github.com/terraform-google-modules/terraform-example-foundation/tree/master/0-bootstrap)
 
@@ -61,7 +61,7 @@ This repository will deploy a highly-available Managed Active directory domain a
    ```
 1. Run `terraform apply`
 
-#### Deploy from Cloud Build pipeline
+#### Deploy Cloud Build pipeline (Advanced Option)
 
 1. Clone the empty gcp-gcds repo.
    ```
@@ -133,7 +133,7 @@ This repository will deploy a highly-available Managed Active directory domain a
     1. Add users or groups under the Cloud OU or groups under the Cloud OU
 
 
-## Google Cloud Directory Sync demo
+## Validate Google Cloud Directory Sync 
   1. Copy scripts onto the windows server with either git or gsutil commands.
 
   1. Create a user list from a Bigquery public dataset containing US names by year and state
@@ -157,7 +157,7 @@ This repository will deploy a highly-available Managed Active directory domain a
     
   1. Helper ldap search rules for Users & Groups
     $ cat gdsc_ldap_rules_examples 
-    
+
   1. Validate the sync, but don't apply 
 
     ```
