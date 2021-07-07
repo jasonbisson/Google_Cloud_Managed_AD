@@ -1,5 +1,4 @@
 environment="<Any unique name>"
-ip_subnetworks="<name of subnet in us-central>"
 project="<GCP Project>"
 internal_cidr_ranges=["<Private Subnet for domain controllers/24"]
 network="<Name of Network>"

@@ -13,12 +13,11 @@ This repository will deploy a highly-available Managed Active directory domain a
 
 - **Google Cloud Directory Sync Simulation** - To demostrate the ability to  Windows instance can used to simulate the sync.
 
-## Client Requirements
+## Prerequisites
 
 ### Terraform plugins
-- [Terraform](https://www.terraform.io/downloads.html) 0.12.x
-- [terraform-provider-google](https://github.com/terraform-providers terraform-provider-google) plugin v2.5.0
-- [terraform-provider-google-beta](https://github.com/terraform-providers/terraform-provider-google-beta) plugin v2.5.0
+- [Terraform](https://www.terraform.io/downloads.html) 0.13.x
+- [terraform-provider-google](https://github.com/terraform-providers terraform-provider-google) plugin 3.50
 
 ### Google SDK
 - [Google SDK](https://cloud.google.com/sdk)
@@ -26,50 +25,85 @@ This repository will deploy a highly-available Managed Active directory domain a
 ### Microsoft RDP Client
 - [Remote Desktop](https://cloud.google.com/compute/docs/instances/connecting-to-instance#windows)
 
-### File structure
-- /scripts: Helper scripts AD commands and Managed AD deployment
-- /main.tf: main file for this module, contains all the resources to create
-- /variables.tf: all the variables for the module
-- /terraform.tfvars.template: Custom variable file to eliminate manual prompts.
-- /README.MD: this file
+## Update variables
 
-## Google Platform Requirements
+1. Change to deployment directory
+   ```
+   cd envs/development
+   ```
+1. Update `backend.tf` with an existing GCS bucket to store Terraform state.
+   ```
+   bucket = "UPDATE_ME"
+   ```
+1. Rename `terraform.example.tfvars` to `terraform.tfvars` and update the file with values from your environment:
+   ```
+   mv terraform.example.tfvars terraform.tfvars
 
-### Enable APIs
-For the tutorial to work, the following APIs will be auto enabled in the project:
-- Identity and Access Management API: `iam.googleapis.com`
-- Compute: `compute.googleapis.com`
-- Managed AD: `managedidentities.googleapis.com`
-- DNS: `dns.googleapis.com`
-
-### Service account
-We need two Terraform service accounts for this module:
-* **Terraform service account** (that will create the Compute Instance and NAT)
-* **VM service account** (that will be created by Terraform Service account and attached to the Compute instance)
-
-The **Terraform service account** used to run this module must have the following IAM Roles:
-- `Compute Instance Admin` on the project to create the VM.
-- `Project IAM Admin` on the project to grant permissions to the VM service account.
 
 ## Deploy Infrastructure
 
-### Deploy with Terraform command line
+### Deploy from a desktop
 
-    ```text
-    #Update terraform.tfvars.template with values for your environment
-    $ cp terraform.tfvars.template terraform.tfvars
-    $ terraform init
-    $ terraform plan
-    $ terraform apply
-    ```
+1. Run `terraform init`
+1. Run `terraform plan` and review the output.
+1. Run `terraform apply`
 
-### (Optional) Deploy with Cloud Build
+**Note** Managed Active Directory deployment can take up to 60 minutes
 
-```text
-gcloud builds submit . --config=cloudbuild.yaml --substitutions _STATEBUCKET='<Your GCS Bucket>',_STATEFOLDER='<Folder for Terraform state file>',_TERRAFORM_ACTION='<apply or destroy>',_ENVIRONMENT='<unique name for deployment>',_INTERNAL_CIDR='<Subnet for domain controllers ie 10.0.1.0/24>',_NETWORK='default',_DOMAIN='<AD domainname>',_SUBNET_NAME='<Subnet name>'
-```
+### Optional Deploy a Cloud Build environment
 
-### Interact with Microsoft Active Directory Domain
+1. Deploy Bootstrap environment from [Cloud Foundation Toolkit](https://github.com/terraform-google-modules/terraform-example-foundation/tree/master/0-bootstrap)
+
+1. Add cloud_source_repos to terraform.tfvars file to build gcp-gcds repo in 0-bootstrap
+
+   ```
+   cloud_source_repos = ["gcp-org", "gcp-environments", "gcp-networks", "gcp-projects", "gcp-gcds"]
+   ```
+1. Run `terraform apply`
+
+#### Deploy from Cloud Build pipeline
+
+1. Clone the empty gcp-gcds repo.
+   ```
+   gcloud source repos clone gcp-gcds --project=YOUR_CLOUD_BUILD_PROJECT_ID_FROM_0-bootstrap
+   ```
+1. Navigate into the repo and change to a non-production branch.
+   ```
+   cd gcp-gcds
+   git checkout -b plan
+   ```
+1. Copy the development environment directory and cloud build configuration files
+   ```
+   cp -r ../gcp-gcds-validator/envs  .
+   cp ../gcp-gcds-validator/build/*  . 
+   ```
+1. Ensure wrapper script can be executed.
+   ```
+   chmod 755 ./tf-wrapper.sh
+   ```
+1. Commit changes.
+   ```
+   git add .
+   git commit -m 'Your message'
+   ```
+1. Push your plan branch to trigger a plan. For this command, the branch `plan` is not a special one. Any branch which name is different from `development`, `non-production` or `production` will trigger a Terraform plan.
+   ```
+   git push --set-upstream origin plan
+   ```
+1. Review the plan output in your Cloud Build project. https://console.cloud.google.com/cloud-build/builds?project=YOUR_CLOUD_BUILD_PROJECT_ID
+1. Merge changes to production branch.
+   ```
+   git checkout -b development
+   git push origin development
+   ```
+1. Review the apply output in your Cloud Build project. https://console.cloud.google.com/cloud-build/builds?project=YOUR_CLOUD_BUILD_PROJECT_ID
+
+1. Destroy the new GCS bucket with gcloud build command
+   ```
+   gcloud builds submit . --config=cloudbuild-tf-destroy.yaml --project your_build_project_id --substitutions=BRANCH_NAME="$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')",_ARTIFACT_BUCKET_NAME='Your Artifact GCS Bucket',_STATE_BUCKET_NAME='Your Terraform GCS bucket',_DEFAULT_REGION='us-central1',_GAR_REPOSITORY='prj-tf-runners'
+   ```
+
+## Interact with Microsoft Active Directory Domain
 
 1. Start an Identity Aware Proxy tunnel & start remote desktop session
     ```text
@@ -99,37 +133,32 @@ gcloud builds submit . --config=cloudbuild.yaml --substitutions _STATEBUCKET='<Y
     1. Add users or groups under the Cloud OU or groups under the Cloud OU
 
 
-### Optional Google Cloud Directory Sync
+## Google Cloud Directory Sync demo
+  1. Copy scripts onto the windows server with either git or gsutil commands.
 
-1. Deploy a Cloud NAT with Terraform to download Google Cloud Directory Sync & interact with Cloud Identity.
-    ```text
-    Clone https://github.com/terraform-google-modules/terraform-google-cloud-nat
-    ```
-1. Powershell scripts to download and install GCDS, download Chrome browser, and add users to Active Directory.
-    ```text
-
-    #Create a user list from a Bigquery public dataset containing US names by year and state
-    $ find_users_bq.bat
+  1. Create a user list from a Bigquery public dataset containing US names by year and state
+     $ find_users_bq.bat
     
-    #Create Base OU for Users & Groups
-    $ create_base_ou.ps1
+  1. Create Base OU for Users & Groups
+     $ create_base_ou.ps1
     
-    #Create Groups
-    $ Copy-Item "groups.csv" -destination C:\Windows\temp\
-    $ create_groups.ps1 
+  1. Create Groups
+     $ Copy-Item "groups.csv" -destination C:\Windows\temp\
+     $ create_groups.ps1 
     
-    #Create Users 
-    $ create_users_bulk.ps1 
+  1. Create Users 
+     $ create_users_bulk.ps1 
 
-    #Add all the users to ALLGCPUSERS groups
-    $ add_users_to_group.ps1 
+  1. Add all the users to ALLGCPUSERS groups
+     $ add_users_to_group.ps1 
 
-    #Review Google Directory Sync Configuration instructions
+  1. Review Google Directory Sync Configuration instructions
     https://cloud.google.com/solutions/federating-gcp-with-active-directory-synchronizing-user-accounts
     
-    #Helper ldap search rules for Users & Groups
+  1. Helper ldap search rules for Users & Groups
     $ cat gdsc_ldap_rules_examples 
-
+    
+  1. Validate the sync, but don't apply 
 
     ```
 # Cleanup (Save Money!)

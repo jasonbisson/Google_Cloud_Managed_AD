@@ -22,6 +22,11 @@ variable "active_directory_domain" {
   description = "Domainname of Managed Active Directory instance"
 }
 
+variable "terraform_service_account" {
+  description = "Service account email of the account to impersonate to run Terraform."
+  type        = string
+  default = ""
+}
 
 variable "region" {
   default = "us-central1"
@@ -29,10 +34,6 @@ variable "region" {
 
 variable "zone" {
   default = "us-central1-b"
-}
-
-variable "ip_subnetworks" {
-  description = "Subnet ip range"
 }
 
 variable "machine_type" {
@@ -79,6 +80,7 @@ variable "auto_delete" {
 variable "network" {
   description = "Network for deployment of GCE instance and peering for Managed AD Instance"
   type = string
+  default = "default"
 }
 
 variable "internal_cidr_ranges" {
@@ -99,7 +101,7 @@ variable "enable_apis" {
 
 variable "activate_apis" {
   description = "The list of apis to activate within the project"
-  default     = ["iam.googleapis.com", "compute.googleapis.com"]
+  default     = ["iam.googleapis.com", "compute.googleapis.com", "dns.googleapis.com", "managedidentities.googleapis.com"]
   type        = list(string)
 }
 
