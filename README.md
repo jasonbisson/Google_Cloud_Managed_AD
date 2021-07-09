@@ -2,7 +2,8 @@
 
 This repository will deploy a highly-available Managed Active directory domain and a windows Compute instance to bind to the new Managed AD domain. In addition, there are powershell scripts to add users to the new domain and validate a sync to Cloud Identity using Google Cloud Directory Sync.
 
-## Costs of this deployment can quickly become an issue if left running! 
+## Costs of this deployment can quickly become an issue if left running!
+
 ```
 Managed Active Directory Domain .40 per hour
 Windows GCE Instance estimate $119 per month
@@ -10,19 +11,21 @@ Windows GCE Instance estimate $119 per month
 
 ## Highlights
 
-- **Managed Active Directory** - The Managed Active Directory domain will be deployed with opinionated defaults for region,zone, and subnet for the Domain controllers. 
+- **Managed Active Directory** - The Managed Active Directory domain will be deployed with opinionated defaults for region,zone, and subnet for the Domain controllers.
 
 - **Isolated Windows Compute Instance** - The Windows instance will be deployed without a public IP, NAT service, and firewalls to limit access.
 
-- **Google Cloud Directory Sync Simulation** - To demostrate the ability to  Windows instance can used to simulate the sync.
+- **Google Cloud Directory Sync Simulation** - To demostrate the ability to Windows instance can used to simulate the sync.
 
 ## Prerequisites
 
 ### Terraform plugins
+
 - [Terraform](https://www.terraform.io/downloads.html) 0.13.x
 - [terraform-provider-google](https://github.com/terraform-providers terraform-provider-google) plugin 3.50
 
 ### Microsoft RDP Client
+
 - [Remote Desktop](https://cloud.google.com/compute/docs/instances/connecting-to-instance#windows)
 
 ## Update Backend & Terraform variables
@@ -42,7 +45,7 @@ Windows GCE Instance estimate $119 per month
 
 ## Deploy Infrastructure
 
-### Deploy via a desktop 
+### Deploy via a desktop
 
 1. Run `terraform init`
 1. Run `terraform plan` and review the output.
@@ -59,6 +62,7 @@ Windows GCE Instance estimate $119 per month
    ```
    cloud_source_repos = ["gcp-org", "gcp-environments", "gcp-networks", "gcp-projects", "gcp-gcds"]
    ```
+
 1. Run `terraform apply`
 
 #### Deploy Cloud Build pipeline (Advanced Option)
@@ -75,7 +79,7 @@ Windows GCE Instance estimate $119 per month
 1. Copy the development environment directory and cloud build configuration files
    ```
    cp -r ../gcp_managed_ad/envs  .
-   cp ../gcp_managed_ad/build/*  . 
+   cp ../gcp_managed_ad/build/*  .
    ```
 1. Ensure wrapper script can be executed.
    ```
@@ -106,67 +110,71 @@ Windows GCE Instance estimate $119 per month
 ## Interact with Microsoft Active Directory Domain
 
 1. Start an Identity Aware Proxy tunnel & start remote desktop session
-    ```text
-    $ gcloud compute start-iap-tunnel <Name Of Windows Server> 3389 --local-host-port=localhost:3389 --zone=us-central1-b
-    ```
+   ```text
+   $ gcloud compute start-iap-tunnel <Name Of Windows Server> 3389 --local-host-port=localhost:3389 --zone=us-central1-b
+   ```
 1. Login with local account creditials and reset password in UI or gcloud cli
-    ``` text
-    $ gcloud compute reset-windows-password <Name of Windows Server> --zone=us-central1-b
-    ```
+   ```text
+   $ gcloud compute reset-windows-password <Name of Windows Server> --zone=us-central1-b
+   ```
 1. Add Server to the new Active Directory domain
-    ```text
-    Run gcloud command to collect the domain admin password
 
-    $  gcloud active-directory domains reset-admin-password
-    Open a Powershell session to run as Administrator
-    $  $domainname = read-host -Prompt "Please enter a domainname" 
-    $  Add-Computer -DomainName $domainname -Credential $domainname\setupadmin -Restart -Force 
-    Enter Domain password 
-    ```
+   ```text
+   Run gcloud command to collect the domain admin password
+
+   $  gcloud active-directory domains reset-admin-password
+   Open a Powershell session to run as Administrator
+   $  $domainname = read-host -Prompt "Please enter a domainname"
+   $  Add-Computer -DomainName $domainname -Credential $domainname\setupadmin -Restart -Force
+   Enter Domain password
+   ```
+
 1. Confirm server joined domain
 
-    1. Log back into server with <Name of domain>\setupadmin
-    1. Click on Windows Administrative Tools and Click on Active Directory Users and Computers
-    1. Click on Name of domain -> Cloud -> Computers
-    1. Click on Domain Controllers to view the domain controllers
-    1. Add users or groups under the Cloud OU or groups under the Cloud OU
+   1. Log back into server with <Name of domain>\setupadmin
+   1. Click on Windows Administrative Tools and Click on Active Directory Users and Computers
+   1. Click on Name of domain -> Cloud -> Computers
+   1. Click on Domain Controllers to view the domain controllers
+   1. Add users or groups under the Cloud OU or groups under the Cloud OU
 
+## Validate Google Cloud Directory Sync
 
-## Validate Google Cloud Directory Sync 
-  1. Copy scripts onto the windows server with either git or gsutil commands.
+1. Copy scripts onto the windows server with either git or gsutil commands.
 
-  1. Create a random user list from a Bigquery public dataset containing US names by year and state
-     ```
-     $ find_users_bq.bat
-     ```
-  1. Create Base OU for Users & Groups
-    ```
-     $ PowerShell -Command .\create_base_ou.ps1
-    ```
-  1. Create Groups
-     ```
-     $ PowerShell -Command Copy-Item "groups.csv" -destination C:\Windows\temp\
-     $ PowerShell -Command .\create_groups.ps1 
-     ```
-  1. Create Users
-     ``` 
-     $ PowerShell -Command .\create_users_bulk.ps1 
-     ```
-  1. Add all the users to ALLGCPUSERS groups
-  ```
-     $ PowerShell -Command .\add_users_to_group.ps1 
-  ```
-  1. Review Google Directory Sync Configuration instructions
-    https://cloud.google.com/solutions/federating-gcp-with-active-directory-synchronizing-user-accounts
-    
-  1. Helper ldap search rules for Users & Groups
-  ```
-    $ cat gdsc_ldap_rules_examples 
-  ```
-  1. Validate the sync, but don't apply 
-
+1. Create a random user list from a Bigquery public dataset containing US names by year and state
    ```
-# Cleanup (Save Money!)
+   $ find_users_bq.bat
+   ```
+1. Create Base OU for Users & Groups
+    ```
+    $ PowerShell -Command .\create_base_ou.ps1
+    ```
+1. Create Groups
+   ```
+   $ PowerShell -Command Copy-Item "groups.csv" -destination C:\Windows\temp\
+   $ PowerShell -Command .\create_groups.ps1
+   ```
+1. Create Users
+   ```
+   $ PowerShell -Command .\create_users_bulk.ps1
+   ```
+1. Add all the users to ALLGCPUSERS groups
+   ```
+   $ PowerShell -Command .\add_users_to_group.ps1
+   ```
 
-    # Destroy the windows infrastructure
-    $ terraform destroy or Cloud build to destroy
+1. Review Google Directory Sync Configuration instructions
+   https://cloud.google.com/solutions/federating-gcp-with-active-directory-synchronizing-user-accounts
+
+1. Helper ldap search rules for Users & Groups
+  ```
+  $ cat gdsc_ldap_rules_examples
+  ```
+
+1. Validate the sync, but don't apply
+
+# Cleanup (Save Money!)
+```
+ # Destroy the windows infrastructure
+ $ terraform destroy or Cloud build to destroy
+```
