@@ -147,11 +147,11 @@ Windows GCE Instance estimate $119 per month
      ```
      $ PowerShell -Command Copy-Item "groups.csv" -destination C:\Windows\temp\
      $ PowerShell -Command .\create_groups.ps1 
-    ```
+     ```
   1. Create Users
      ``` 
      $ PowerShell -Command .\create_users_bulk.ps1 
-   ```
+     ```
   1. Add all the users to ALLGCPUSERS groups
   ```
      $ PowerShell -Command .\add_users_to_group.ps1 
