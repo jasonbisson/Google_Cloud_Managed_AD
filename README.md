@@ -136,30 +136,36 @@ Windows GCE Instance estimate $119 per month
   1. Copy scripts onto the windows server with either git or gsutil commands.
 
   1. Create a random user list from a Bigquery public dataset containing US names by year and state
+     ```
      $ find_users_bq.bat
-    
+     ```
   1. Create Base OU for Users & Groups
+    ```
      $ PowerShell -Command .\create_base_ou.ps1
-    
+    ```
   1. Create Groups
+     ```
      $ PowerShell -Command Copy-Item "groups.csv" -destination C:\Windows\temp\
      $ PowerShell -Command .\create_groups.ps1 
-    
-  1. Create Users 
+    ```
+  1. Create Users
+     ``` 
      $ PowerShell -Command .\create_users_bulk.ps1 
-
+   ```
   1. Add all the users to ALLGCPUSERS groups
+  ```
      $ PowerShell -Command .\add_users_to_group.ps1 
-
+  ```
   1. Review Google Directory Sync Configuration instructions
     https://cloud.google.com/solutions/federating-gcp-with-active-directory-synchronizing-user-accounts
     
   1. Helper ldap search rules for Users & Groups
+  ```
     $ cat gdsc_ldap_rules_examples 
-
+  ```
   1. Validate the sync, but don't apply 
 
-    ```
+   ```
 # Cleanup (Save Money!)
 
     # Destroy the windows infrastructure
