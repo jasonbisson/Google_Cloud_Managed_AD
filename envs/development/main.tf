@@ -18,7 +18,7 @@ module "cloud-nat" {
   region        = var.region
   network       = var.network
   create_router = var.create_router
-  depends_on = [google_compute_network.vpc_network]
+  depends_on    = [google_compute_network.vpc_network]
 }
 
 resource "google_compute_network" "vpc_network" {
@@ -120,14 +120,14 @@ resource "google_compute_instance" "default" {
     enable_secure_boot          = true
     enable_vtpm                 = true
   }
-  
+
   depends_on = [google_compute_network.vpc_network]
 }
 
-resource "google_compute_firewall" "default" {
+resource "google_compute_firewall" "internal" {
   project     = var.project
-  name        = "${var.environment}${random_id.service_account.hex}"
-  description = "GCE Firewall for ${var.environment}"
+  name        = "internal-firewall"
+  description = "Internal GCE Firewall for ${var.environment}"
   network     = var.network
   priority    = 1000
   direction   = "EGRESS"
@@ -139,15 +139,30 @@ resource "google_compute_firewall" "default" {
     protocol = "udp"
   }
   destination_ranges = var.internal_cidr_ranges
-  depends_on = [google_compute_network.vpc_network]
+  depends_on         = [google_compute_network.vpc_network]
+}
+
+resource "google_compute_firewall" "iap" {
+  project       = var.project
+  name          = "iap-firewall"
+  description   = "IAP GCE Firewall for ${var.environment}"
+  network       = var.network
+  priority      = 1000
+  direction     = "INGRESS"
+  source_ranges = ["35.235.240.0/20"]
+  allow {
+    protocol = "tcp"
+    ports    = ["3389"]
+  }
+  depends_on         = [google_compute_network.vpc_network]
 }
 
 
 resource "google_active_directory_domain" "ad-domain" {
-  project            = var.project
-  domain_name        = var.active_directory_domain
-  locations          = [var.region]
-  reserved_ip_range  = var.reserved_ip_range
+  project             = var.project
+  domain_name         = var.active_directory_domain
+  locations           = [var.region]
+  reserved_ip_range   = var.reserved_ip_range
   authorized_networks = ["projects/${var.project}/global/networks/${var.network}"]
-  depends_on = [google_compute_network.vpc_network]
+  depends_on          = [google_compute_network.vpc_network]
 }

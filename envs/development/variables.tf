@@ -25,7 +25,7 @@ variable "active_directory_domain" {
 variable "terraform_service_account" {
   description = "Service account email of the account to impersonate to run Terraform."
   type        = string
-  default = ""
+  default     = ""
 }
 
 variable "region" {
@@ -54,12 +54,12 @@ variable "labels" {
 
 variable "source_image_family" {
   description = "Source image family. If neither source_image nor source_image_family is specified."
-  default = "windows-2016"
+  default     = "windows-2016"
 }
 
 variable "source_image_project" {
   description = "Project where the source image comes from"
-  default = "windows-cloud"
+  default     = "windows-cloud"
 }
 
 variable "disk_size_gb" {
@@ -79,17 +79,17 @@ variable "auto_delete" {
 
 variable "network" {
   description = "Network for deployment of GCE instance and peering for Managed AD Instance"
-  type = string
-  default = "default"
+  type        = string
+  default     = "default"
 }
 
 variable "internal_cidr_ranges" {
-  type = list
+  type        = list
   description = "Firewall rule to connect to Managed AD instance"
 }
 
 variable "reserved_ip_range" {
-  type = string
+  type        = string
   description = "Subnet range to deploy domain controllers of Managed AD instance"
 }
 

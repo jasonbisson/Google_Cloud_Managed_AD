@@ -113,12 +113,11 @@ Windows GCE Instance estimate $119 per month
     ``` text
     $ gcloud compute reset-windows-password <Name of Windows Server> --zone=us-central1-b
     ```
-1. Retrieve the Domain administrator password from Secrets Manager in UI or gcloud cli
-    ``` text
-    $ gcloud secrets versions access latest --secret="<name of domain without suffix>" --format json
-    ```
 1. Add Server to the new Active Directory domain
     ```text
+    Run gcloud command to collect the domain admin password
+
+    $  gcloud active-directory domains reset-admin-password
     Open a Powershell session to run as Administrator
     $  $domainname = read-host -Prompt "Please enter a domainname" 
     $  Add-Computer -DomainName $domainname -Credential $domainname\setupadmin -Restart -Force 
@@ -136,21 +135,21 @@ Windows GCE Instance estimate $119 per month
 ## Validate Google Cloud Directory Sync 
   1. Copy scripts onto the windows server with either git or gsutil commands.
 
-  1. Create a user list from a Bigquery public dataset containing US names by year and state
+  1. Create a random user list from a Bigquery public dataset containing US names by year and state
      $ find_users_bq.bat
     
   1. Create Base OU for Users & Groups
-     $ create_base_ou.ps1
+     $ PowerShell -Command .\create_base_ou.ps1
     
   1. Create Groups
-     $ Copy-Item "groups.csv" -destination C:\Windows\temp\
-     $ create_groups.ps1 
+     $ PowerShell -Command Copy-Item "groups.csv" -destination C:\Windows\temp\
+     $ PowerShell -Command .\create_groups.ps1 
     
   1. Create Users 
-     $ create_users_bulk.ps1 
+     $ PowerShell -Command .\create_users_bulk.ps1 
 
   1. Add all the users to ALLGCPUSERS groups
-     $ add_users_to_group.ps1 
+     $ PowerShell -Command .\add_users_to_group.ps1 
 
   1. Review Google Directory Sync Configuration instructions
     https://cloud.google.com/solutions/federating-gcp-with-active-directory-synchronizing-user-accounts
