@@ -74,12 +74,12 @@ Windows GCE Instance estimate $119 per month
    ```
 1. Copy the development environment directory and cloud build configuration files
    ```
-   cp -r ../gcp-gcds-validator/envs  .
-   cp ../gcp-gcds-validator/build/*  . 
+   cp -r ../gcp_managed_ad/envs  .
+   cp ../gcp_managed_ad/build/*  . 
    ```
 1. Ensure wrapper script can be executed.
    ```
-   chmod 755 ./tf-wrapper.sh
+   chmod 755 tf-wrapper.sh
    ```
 1. Commit changes.
    ```
@@ -100,7 +100,7 @@ Windows GCE Instance estimate $119 per month
 
 1. Destroy the new GCS bucket with gcloud build command
    ```
-   gcloud builds submit . --config=cloudbuild-tf-destroy.yaml --project your_build_project_id --substitutions=BRANCH_NAME="$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')",_ARTIFACT_BUCKET_NAME='Your Artifact GCS Bucket',_STATE_BUCKET_NAME='Your Terraform GCS bucket',_DEFAULT_REGION='us-central1',_GAR_REPOSITORY='prj-tf-runners'
+   gcloud builds submit . --config=cloudbuild-tf-destroy.yaml --project <your_build_project_id> --substitutions=BRANCH_NAME="$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')",_ARTIFACT_BUCKET_NAME='Your Artifact GCS Bucket',_STATE_BUCKET_NAME=<Your Terraform state GCS bucket>,_DEFAULT_REGION='us-central1',_GAR_REPOSITORY='prj-tf-runners'
    ```
 
 ## Interact with Microsoft Active Directory Domain
