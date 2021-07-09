@@ -167,9 +167,9 @@ Windows GCE Instance estimate $119 per month
    https://cloud.google.com/solutions/federating-gcp-with-active-directory-synchronizing-user-accounts
 
 1. Helper ldap search rules for Users & Groups
-  ```
-  $ cat gdsc_ldap_rules_examples
-  ```
+   ```
+   $ cat gdsc_ldap_rules_examples
+   ```
 
 1. Validate the sync, but don't apply
 
